@@ -16,7 +16,7 @@
 #include "_define.dm"
 #include "_stubs.dm"
 #include "process.dm"
-#include "process_scheduler.dm"
+#include "processScheduler.dm"
 #include "testDyingUpdateQueueProcess.dm"
 #include "testHarness.dm"
 #include "testHungProcess.dm"
