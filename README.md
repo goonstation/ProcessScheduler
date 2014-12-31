@@ -10,7 +10,10 @@ This code is released under the AGPL.
 
 ##INSTALLATION
 
-To install the test project, you will require:
+To integrate the process scheduler to your codebase, you will not need anything except the contents of the core/ folder. The rest of the project is simply for testing and to provide an example for the process scheduler code.
+
+### Test project setup
+To compile and run the test project, you will require:
 
 - node.js
 - BYOND
@@ -27,17 +30,28 @@ Then you can either compile with DM or open the DM environment in DreamMaker and
 ##USAGE
 
 ###BASICS
-To use this in your SS13 codebase, you'll need:
+To use the process scheduler in your SS13 codebase, you'll need:
 
-- process.dm
-- processScheduler.dm
-- processScheduler.js
-- updateQueue.dm
-- updateQueueWorker.dm
-- _defines.dm
-- _stubs.dm
+- core/_defines.dm
+- core/_stubs.dm
+- core/process.dm
+- core/processScheduler.dm
+- core/processScheduler.js
+- core/updateQueue.dm
+- core/updateQueueWorker.dm
 
-To integrate, you can copy the contents of _defines.dm into your global defines file. Most ss13 codebases already have the code from _stubs.dm, except the bootstrap stuff. The bootstrap-specific interface code in processScheduler can easily be ripped out and replaced with other HTML.
+To integrate, you can copy the contents of _defines.dm into your global defines file. Most ss13 codebases already have the code from _stubs.dm. 
+
+The processScheduler is intended as a replacement for the old master_controller from r4407 and other fork codebases. To implement it, you need only to add the source files to your DM environment, and add the following code into world.New, above where the old master_controller is initialized.
+
+```
+processScheduler.setup()
+processScheduler.start()
+```
+
+The processScheduler will automatically find all subtypes of process, and begin processing them.
+
+The interface code in test/processSchedulerView.dm is simply an example frontend, and can easily be rebuilt to use other styles, and/or render simple html without using javascript for refreshing the panel and killing processes.
 
 ###DETAILS
 
