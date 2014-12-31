@@ -90,7 +90,7 @@ var/global/datum/controller/processScheduler/processScheduler
 			continue
 
 		// If the process should be running by now, go ahead and queue it
-		if (world.time > last_start[p] + p.schedule_interval)
+		if (world.timeofday > last_start[p] + p.schedule_interval)
 			setQueuedProcessState(p)
 
 /datum/controller/processScheduler/proc/runQueuedProcesses()
@@ -163,7 +163,7 @@ var/global/datum/controller/processScheduler/processScheduler
 	if (!(process in last_start))
 		last_start += process
 	if (isnull(time))
-		time = world.time
+		time = world.timeofday
 
 	last_start[process] = time
 
@@ -171,7 +171,7 @@ var/global/datum/controller/processScheduler/processScheduler
 	if (!(process in last_run_time))
 		last_run_time[process] = 0
 	if (isnull(time))
-		time = world.time
+		time = world.timeofday
 
 	var/lastRunTime = time - last_start[process]
 

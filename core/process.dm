@@ -86,10 +86,10 @@ datum/controller/process/New(var/datum/controller/processScheduler/scheduler)
 	
 datum/controller/process/proc/started()
 	// Initialize last_slept so we can know when to sleep
-	last_slept = world.time
+	last_slept = world.timeofday
 	
 	// Initialize run_start so we can detect hung processes.
-	run_start = world.time
+	run_start = world.timeofday
 
 	running()
 	main.processStarted(src)
@@ -138,7 +138,7 @@ datum/controller/process/proc/handleHung()
 	var/lastObjType = "null"
 	if(istype(lastObj))
 		lastObjType = lastObj.type
-	var/msg = "[name] process hung at tick #[ticks]. Process was unresponsive for [world.time - run_start] server ticks and was restarted. Last task: [last_task]. Last Object Type: [lastObjType]"
+	var/msg = "[name] process hung at tick #[ticks]. Process was unresponsive for [(world.timeofday - run_start) / 10] seconds and was restarted. Last task: [last_task]. Last Object Type: [lastObjType]"
 	logTheThing("debug", null, null, msg)
 	logTheThing("diary", null, null, msg, "debug")
 	message_admins(msg)
@@ -160,10 +160,10 @@ datum/controller/process/proc/scheck(var/tickId = 0)
 		// This will only really help if the doWork proc ends up in an infinite loop.
 		handleHung()
 		CRASH("Process [name] hung and was restarted.")
-	if (world.time > last_slept + sleep_interval)
+	if (world.timeofday > last_slept + sleep_interval)
 		// If we haven't slept in sleep_interval ticks, sleep to allow other work to proceed.
 		sleep(0)
-		last_slept = world.time
+		last_slept = world.timeofday
 		
 datum/controller/process/proc/update()				
 	// Clear delta
@@ -184,7 +184,7 @@ datum/controller/process/proc/update()
 			
 		
 datum/controller/process/proc/getElapsedTime()
-	return world.time - run_start
+	return world.timeofday - run_start
 	
 datum/controller/process/proc/tickDetail()
 	return
