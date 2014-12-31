@@ -84,28 +84,37 @@
 	uq_dbg("UpdateQueue completed run.")
 		
 /datum/updateQueue/proc/checkWorker()
-	var/theTime = world.time
+	var/theTime = world.timeofday
 	if(istype(currentWorker))
-		if(theTime - currentWorker.lastStart > (adjustedWorkerTimeout / world.tick_lag)) // This worker is a bit slow, let's spawn a new one and kill the old one.
+		if(theTime - currentWorker.lastStart > adjustedWorkerTimeout) // This worker is a bit slow, let's spawn a new one and kill the old one.
 			uq_dbg("Current worker is lagging... starting a new one.")
 			killWorker()
 			startWorker()
 	else // No worker!
-		uq_dbg("BUG: update queue ended up without a worker.")
+		uq_dbg("update queue ended up without a worker... starting a new one...")
 		startWorker()
 		
 /datum/updateQueue/proc/startWorker()
-	// Create a new worker.
+	// only run the worker if we have objects to work on
 	if(objects.len)
 		uq_dbg("Starting worker process.")
-		currentWorker = new(objects, procName, arguments)
+		
+		// No need to create a fresh worker if we already have one...
+		if (istype(currentWorker))
+			currentWorker.init(objects, procName, arguments)
+		else
+			currentWorker = new(objects, procName, arguments)
 		currentWorker.start()
 	else
 		uq_dbg("Queue is empty. No worker was started.")
 		currentWorker = null
 		
 /datum/updateQueue/proc/killWorker()
+	// Kill the worker
 	currentWorker.kill()
+	currentWorker = null
+	// After we kill a worker, yield so that if the worker's been tying up the cpu, other stuff can immediately resume
+	sleep(-1)
 	currentKillCount++
 	totalKillCount++
 	if (currentKillCount >= 3)

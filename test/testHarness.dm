@@ -6,6 +6,7 @@
 var/global/datum/processSchedulerView/processSchedulerView
 
 world
+	loop_checks = 0
 	New()
 		..()
 		ticker = new
@@ -24,8 +25,12 @@ mob
 			set name = "Start Process Scheduler"
 			processScheduler.setup()
 			processScheduler.start()
-			
+
 		getProcessSchedulerContext()
 			set name = "Get Process Scheduler Status Panel"
 			processSchedulerView.getContext()
 
+		runUpdateQueueTests()
+			set name = "Run Update Queue Testsuite"
+			var/datum/updateQueueTests/t = new
+			t.runTests()
