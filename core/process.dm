@@ -53,6 +53,9 @@
 	// hang_restart_time - After this much time(in 1/10 seconds), the server will automatically kill and restart the process.
 	var/tmp/hang_restart_time = PROCESS_DEFAULT_HANG_RESTART_TIME
 	
+	// cpu_threshold - if world.cpu >= cpu_threshold, scheck() will call sleep(1) to defer further work until the next tick. This keeps a process from driving a tick into overtime (causing perceptible lag)	
+	var/tmp/cpu_threshold = PROCESS_DEFAULT_CPU_THRESHOLD
+	
 	/**
 	 * recordkeeping vars
 	 */
@@ -160,6 +163,11 @@ datum/controller/process/proc/scheck(var/tickId = 0)
 		// This will only really help if the doWork proc ends up in an infinite loop.
 		handleHung()
 		CRASH("Process [name] hung and was restarted.")
+		
+	if (world.cpu >= cpu_threshold)
+		sleep(1)
+		last_slept = world.timeofday
+	
 	if (world.timeofday > last_slept + sleep_interval)
 		// If we haven't slept in sleep_interval ticks, sleep to allow other work to proceed.
 		sleep(0)

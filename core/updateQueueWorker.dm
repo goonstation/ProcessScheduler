@@ -5,42 +5,26 @@ datum/updateQueueWorker
 	var/tmp/procName
 	var/tmp/list/arguments
 	var/tmp/lastStart
-	var/tmp/frameStartTime
-	var/tmp/tick
-	// Deciseconds that can elapse before the worker defers execution into the next tick
-	var/tmp/frameSkipTimeout
+	var/tmp/cpuThreshold
 
-datum/updateQueueWorker/New(var/list/objects, var/procName, var/list/arguments, var/frameSkipTimeout)
+datum/updateQueueWorker/New(var/list/objects, var/procName, var/list/arguments, var/cpuThreshold = 90)
 	..()
 	uq_dbg("updateQueueWorker created.")
 
-	init(objects, procName, arguments, frameSkipTimeout)
+	init(objects, procName, arguments, cpuThreshold)
 
-datum/updateQueueWorker/proc/init(var/list/objects, var/procName, var/list/arguments, var/frameSkipTimeout)
+datum/updateQueueWorker/proc/init(var/list/objects, var/procName, var/list/arguments, var/cpuThreshold = 90)
 	src.objects = objects
 	src.procName = procName
 	src.arguments = arguments
-	
-	if (!frameSkipTimeout)
-		src.frameSkipTimeout = world.tick_lag
-	else
-		src.frameSkipTimeout = frameSkipTimeout
-		
+	src.cpuThreshold = cpuThreshold
+			
 	killed = 0
 	finished = 0
-	frameStartTime = 0
-	tick = 0
-	
-datum/updateQueueWorker/proc/resetTick()
-	tick = world.time
-	frameStartTime = world.timeofday
 
 datum/updateQueueWorker/proc/doWork()
 	// If there's nothing left to execute or we were killed, mark finished and return.
 	if (!objects || !objects.len) return finished()
-
-	if (!tick)
-		resetTick()
 
 	lastStart = world.timeofday // Absolute number of ticks since the world started up
 
@@ -54,16 +38,12 @@ datum/updateQueueWorker/proc/doWork()
 	// or we were killed while running the above code, mark finished and return.
 	if (!objects || !objects.len) return finished()
 	
-	if (tick < world.time)
-		// Server ticked while we were running, we're good to go
-		resetTick()
-
-	if (world.timeofday - frameStartTime > frameSkipTimeout )
+	if (world.cpu > cpuThreshold)
 		// We don't want to force a tick into overtime!
 		// If the tick is about to go overtime, spawn the next update to go
 		// in the next tick.
-		uq_dbg("tick went into overtime, deferred next update to next tick [1+(world.time / world.tick_lag)]")
-		tick = 0
+		uq_dbg("tick went into overtime with world.cpu = [world.cpu], deferred next update to next tick [1+(world.time / world.tick_lag)]")
+		
 		spawn(1)
 			doWork()
 	else
