@@ -13,18 +13,18 @@
 // END_PREFERENCES
 
 // BEGIN_INCLUDE
-#include "_define.dm"
-#include "_stubs.dm"
-#include "process.dm"
-#include "processScheduler.dm"
-#include "processSchedulerView.dm"
-#include "testDyingUpdateQueueProcess.dm"
-#include "testHarness.dm"
-#include "testHungProcess.dm"
-#include "testNiceProcess.dm"
-#include "testSlowProcess.dm"
-#include "testUpdateQueueProcess.dm"
-#include "updateQueue.dm"
-#include "updateQueueWorker.dm"
+#include "core\_define.dm"
+#include "core\_stubs.dm"
+#include "core\process.dm"
+#include "core\processScheduler.dm"
+#include "core\updateQueue.dm"
+#include "core\updateQueueWorker.dm"
+#include "test\processSchedulerView.dm"
+#include "test\testDyingUpdateQueueProcess.dm"
+#include "test\testHarness.dm"
+#include "test\testHungProcess.dm"
+#include "test\testNiceProcess.dm"
+#include "test\testSlowProcess.dm"
+#include "test\testUpdateQueueProcess.dm"
 // END_INCLUDE
 
