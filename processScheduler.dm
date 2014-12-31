@@ -212,70 +212,19 @@ var/global/datum/controller/processScheduler/processScheduler
 		return t / c
 	return c
 
-/**
- * getContext
- * Outputs an interface showing stats for all processes.
- */
-/datum/controller/processScheduler/proc/getContext()
-	bootstrap_browse()
-	usr << browse('processScheduler.js', "file=processScheduler.js;display=0")
+/datum/controller/processScheduler/proc/getStatusData()
+	var/list/data = new
 
-	var/text = {"<html><head>
-	<title>Process Scheduler Detail</title>
-	<script type="text/javascript">var ref = '\ref[src]';</script>
-	[bootstrap_includes()]
-	<script type="text/javascript" src="processScheduler.js"></script>
-	</head>
-	<body>
-	<h2>Process Scheduler</h2>
-	<div class="btn-group">
-	<button id="btn-refresh" class="btn">Refresh</button>
-	</div>
-
-	<h3>The process scheduler controls [processes.len] loops.<h3>"}
-
-	text += "<div id=\"processTable\">"
-	text += getProcessTable()
-	text += "</div></body></html>"
-
-	usr << browse(text, "window=processSchedulerContext;size=800x600")
-
-/datum/controller/processScheduler/proc/getProcessTable()
-	var/text = "<table class=\"table table-striped\"><thead><tr><td>Name</td><td>Avg(s)</td><td>Last(s)</td><td>Highest(s)</td><td>Tickcount</td><td>Tickrate</td><td>State</td><td>Kill</td></tr></thead><tbody>"
-	// and the context of each
 	for (var/datum/controller/process/p in processes)
-		var/list/data = p.getContextData()
-		text += "<tr>"
-		text += "<td>[data["name"]]</td>"
-		text += "<td>[num2text(data["averageRunTime"]/10,3)]</td>"
-		text += "<td>[num2text(data["lastRunTime"]/10,3)]</td>"
-		text += "<td>[num2text(data["highestRunTime"]/10,3)]</td>"
-		text += "<td>[num2text(data["ticks"],4)]</td>"
-		text += "<td>[data["schedule"]]</td>"
-		text += "<td>[data["status"]]</td>"
-		text += "<td><button class=\"btn kill-btn\" data-process-name=\"[data["name"]]\" id=\"kill-[data["name"]]\">Kill</button></td>"
-		text += "</tr>"
+		data.len++
+		data[data.len] = p.getContextData()
 
+	return data
 
-	text += "</tbody></table>"
-	return text
+/datum/controller/processScheduler/proc/getProcessCount()
+	return processes.len
 
-/datum/controller/processScheduler/Topic(href, href_list)
-	if (!href_list["action"])
-		return
-
-	switch(href_list["action"])
-		if ("kill")
-			var/toKill = href_list["name"]
-			if (nameToProcessMap[toKill])
-				var/datum/controller/process/p = nameToProcessMap[toKill]
-				p.kill()
-				refreshProcessTable()
-		if ("refresh")
-			refreshProcessTable()
-
-/datum/controller/processScheduler/proc/refreshProcessTable()
-	windowCall("handleRefresh", getProcessTable())
-
-/datum/controller/processScheduler/proc/windowCall(var/function, var/data = null)
-	usr << output(data, "processSchedulerContext.browser:[function]")
+/datum/controller/processScheduler/proc/killProcess(var/processName as text)
+	if (nameToProcessMap[processName])
+		var/datum/controller/process/p = nameToProcessMap[processName]
+		p.kill()

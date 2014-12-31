@@ -17,6 +17,7 @@
 #include "_stubs.dm"
 #include "process.dm"
 #include "processScheduler.dm"
+#include "processSchedulerView.dm"
 #include "testDyingUpdateQueueProcess.dm"
 #include "testHarness.dm"
 #include "testHungProcess.dm"

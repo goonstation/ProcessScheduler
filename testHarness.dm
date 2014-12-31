@@ -3,12 +3,14 @@
  */
 #define DEBUG
 
-world
+var/global/datum/processSchedulerView/processSchedulerView
 
+world
 	New()
 		..()
 		ticker = new
 		processScheduler = new
+		processSchedulerView = new
 
 mob
 	step_size = 8
@@ -25,5 +27,5 @@ mob
 			
 		getProcessSchedulerContext()
 			set name = "Get Process Scheduler Status Panel"
-			processScheduler.getContext()
+			processSchedulerView.getContext()
 
