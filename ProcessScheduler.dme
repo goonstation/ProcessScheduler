@@ -26,6 +26,5 @@
 #include "testUpdateQueueProcess.dm"
 #include "updateQueue.dm"
 #include "updateQueueWorker.dm"
-#include "var_dump.dm"
 // END_INCLUDE
 
