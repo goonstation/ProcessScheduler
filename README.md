@@ -6,7 +6,11 @@ A Goonstation release, maintained by Volundr
 
 This is a mostly self-contained, fairly well-documented implementation of the main loop process architecture in use in Goonstation.
 
-This code is released under the AGPL.
+##LICENSE
+
+[![Creative Commons License](https://licensebuttons.net/l/by-nc/4.0/80x15.png)](http://creativecommons.org/licenses/by-nc/4.0/)
+
+This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 ##INSTALLATION
 
