@@ -141,6 +141,11 @@ datum/controller/process/proc/handleHung()
 	var/lastObjType = "null"
 	if(istype(lastObj))
 		lastObjType = lastObj.type
+	
+	// If world.timeofday has rolled over, then we need to adjust.
+	if (world.timeofday < run_start)
+		run_start -= 864000
+	
 	var/msg = "[name] process hung at tick #[ticks]. Process was unresponsive for [(world.timeofday - run_start) / 10] seconds and was restarted. Last task: [last_task]. Last Object Type: [lastObjType]"
 	logTheThing("debug", null, null, msg)
 	logTheThing("diary", null, null, msg, "debug")
@@ -163,15 +168,19 @@ datum/controller/process/proc/scheck(var/tickId = 0)
 		// This will only really help if the doWork proc ends up in an infinite loop.
 		handleHung()
 		CRASH("Process [name] hung and was restarted.")
-		
+	
 	if (world.cpu >= cpu_threshold)
 		sleep(1)
 		last_slept = world.timeofday
-	
-	if (world.timeofday > last_slept + sleep_interval)
-		// If we haven't slept in sleep_interval ticks, sleep to allow other work to proceed.
-		sleep(0)
-		last_slept = world.timeofday
+	else
+		// If world.timeofday has rolled over, then we need to adjust.
+		if (world.timeofday < last_slept)
+			last_slept -= 864000
+		
+		if (world.timeofday > last_slept + sleep_interval)
+			// If we haven't slept in sleep_interval ticks, sleep to allow other work to proceed.
+			sleep(0)
+			last_slept = world.timeofday
 		
 datum/controller/process/proc/update()				
 	// Clear delta
@@ -192,6 +201,8 @@ datum/controller/process/proc/update()
 			
 		
 datum/controller/process/proc/getElapsedTime()
+	if (world.timeofday < run_start)
+		return world.timeofday - (run_start - 864000)
 	return world.timeofday - run_start
 	
 datum/controller/process/proc/tickDetail()

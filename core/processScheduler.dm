@@ -88,7 +88,11 @@ var/global/datum/controller/processScheduler/processScheduler
 		// Don't double-queue, don't queue running processes
 		if (p.running || p.queued || !p.idle)
 			continue
-
+		
+		// If world.timeofday has rolled over, then we need to adjust.
+		if (world.timeofday < last_start[p])
+			last_start[p] -= 864000
+			
 		// If the process should be running by now, go ahead and queue it
 		if (world.timeofday > last_start[p] + p.schedule_interval)
 			setQueuedProcessState(p)
@@ -104,7 +108,9 @@ var/global/datum/controller/processScheduler/processScheduler
 
 	// init recordkeeping vars
 	last_start.Add(process)
+	last_start[process] = 0
 	last_run_time.Add(process)
+	last_run_time[process] = 0
 	last_twenty_run_times.Add(process)
 	last_twenty_run_times[process] = list()
 	highest_run_time.Add(process)
@@ -160,19 +166,19 @@ var/global/datum/controller/processScheduler/processScheduler
 		running += process
 
 /datum/controller/processScheduler/proc/recordStart(var/datum/controller/process/process, var/time = null)
-	if (!(process in last_start))
-		last_start += process
 	if (isnull(time))
 		time = world.timeofday
 
 	last_start[process] = time
 
 /datum/controller/processScheduler/proc/recordEnd(var/datum/controller/process/process, var/time = null)
-	if (!(process in last_run_time))
-		last_run_time[process] = 0
 	if (isnull(time))
 		time = world.timeofday
-
+	
+	// If world.timeofday has rolled over, then we need to adjust.
+	if (time < last_start[process])
+		last_start[process] -= 864000
+		
 	var/lastRunTime = time - last_start[process]
 
 	if(lastRunTime < 0)

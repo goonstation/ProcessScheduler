@@ -84,9 +84,13 @@
 	uq_dbg("UpdateQueue completed run.")
 		
 /datum/updateQueue/proc/checkWorker()
-	var/theTime = world.timeofday
 	if(istype(currentWorker))
-		if(theTime - currentWorker.lastStart > adjustedWorkerTimeout) // This worker is a bit slow, let's spawn a new one and kill the old one.
+		// If world.timeofday has rolled over, then we need to adjust.
+		if(world.timeofday < currentWorker.lastStart)
+			currentWorker.lastStart -= 864000
+			
+		if(world.timeofday - currentWorker.lastStart > adjustedWorkerTimeout) 
+			// This worker is a bit slow, let's spawn a new one and kill the old one.
 			uq_dbg("Current worker is lagging... starting a new one.")
 			killWorker()
 			startWorker()
