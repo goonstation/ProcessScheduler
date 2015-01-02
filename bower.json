@@ -13,7 +13,7 @@
     "process",
     "scheduler"
   ],
-  "license": "AGPL",
+  "license": "CC-BY-NC",
   "ignore": [
     "**/.*",
     "node_modules",
