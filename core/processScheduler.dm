@@ -34,6 +34,20 @@ var/global/datum/controller/processScheduler/processScheduler
 
 	// Controls whether the scheduler is running or not
 	var/tmp/isRunning = 0
+	
+	// Setup for these processes will be deferred until all the other processes are set up.
+	var/tmp/list/deferredSetupList = new
+
+/**
+ * deferSetupFor
+ * @param path processPath
+ * If a process needs to be initialized after everything else, add it to
+ * the deferred setup list. On goonstation, only the ticker needs to have
+ * this treatment.
+ */
+/datum/controller/processScheduler/proc/deferSetupFor(var/processPath)
+	if (!processPath in deferredSetupList)
+		deferredSetupList += processPath
 
 /datum/controller/processScheduler/proc/setup()
 	// There can be only one
@@ -41,16 +55,14 @@ var/global/datum/controller/processScheduler/processScheduler
 		del(src)
 		return 0
 
+	var/process
 	// Add all the processes we can find, except for the ticker
-	for (var/process in typesof(/datum/controller/process) - /datum/controller/process - /datum/controller/process/ticker)
+	for (process in typesof(/datum/controller/process) - /datum/controller/process)
+		if (!(process in deferredSetupList))
+			addProcess(new process(src))
+
+	for (process in deferredSetupList)
 		addProcess(new process(src))
-
-	// Ticker has to be initialized last
-	addProcess(new /datum/controller/process/ticker(src))
-
-	// Once the process scheduler is initialized, start the pregame process
-	spawn
-		ticker.pregame()
 
 /datum/controller/processScheduler/proc/start()
 	isRunning = 1
@@ -88,7 +100,7 @@ var/global/datum/controller/processScheduler/processScheduler
 		// Don't double-queue, don't queue running processes
 		if (p.running || p.queued || !p.idle)
 			continue
-		
+
 		// If world.timeofday has rolled over, then we need to adjust.
 		if (world.timeofday < last_start[p])
 			last_start[p] -= 864000
@@ -174,7 +186,7 @@ var/global/datum/controller/processScheduler/processScheduler
 /datum/controller/processScheduler/proc/recordEnd(var/datum/controller/process/process, var/time = null)
 	if (isnull(time))
 		time = world.timeofday
-	
+
 	// If world.timeofday has rolled over, then we need to adjust.
 	if (time < last_start[process])
 		last_start[process] -= 864000

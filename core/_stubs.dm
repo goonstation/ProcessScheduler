@@ -33,26 +33,3 @@
  * or the object is placed in an object pool (effectively out-of-play so to speak)
  */
 /datum/var/disposed
-
-/**
- * gameticker stub process -- in goonstation, the gameticker controls the round
- * and other round-related shit.
- */
-/datum/controller/process/ticker/setup()
-	name = "Ticker"
-	schedule_interval = 5
-
-/**
- * pregame
- *
- * gameticker stub -- your pregame should be called after all other processes are
- * intitialized and running.
- */
-/datum/ticker/proc/pregame()
-
-/**
- * var/global/ticker
- *
- * The ticker stub global instance
- */
-/var/global/datum/ticker/ticker

@@ -9,7 +9,6 @@ world
 	loop_checks = 0
 	New()
 		..()
-		ticker = new
 		processScheduler = new
 		processSchedulerView = new
 
