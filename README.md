@@ -49,6 +49,7 @@ To integrate, you can copy the contents of _defines.dm into your global defines 
 The processScheduler is intended as a replacement for the old master_controller from r4407 and other fork codebases. To implement it, you need only to add the source files to your DM environment, and add the following code into world.New, above where the old master_controller is initialized.
 
 ```
+processScheduler = new
 processScheduler.setup()
 processScheduler.start()
 ```
