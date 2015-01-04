@@ -56,6 +56,9 @@
 	// cpu_threshold - if world.cpu >= cpu_threshold, scheck() will call sleep(1) to defer further work until the next tick. This keeps a process from driving a tick into overtime (causing perceptible lag)	
 	var/tmp/cpu_threshold = PROCESS_DEFAULT_CPU_THRESHOLD
 	
+	// How many times in the current run has the process deferred work till the next tick?
+	var/tmp/cpu_defer_count = 0
+	
 	/**
 	 * recordkeeping vars
 	 */
@@ -93,6 +96,9 @@ datum/controller/process/proc/started()
 	
 	// Initialize run_start so we can detect hung processes.
 	run_start = world.timeofday
+
+	// Initialize defer count
+	cpu_defer_count = 0
 
 	running()
 	main.processStarted(src)
@@ -169,8 +175,11 @@ datum/controller/process/proc/scheck(var/tickId = 0)
 		handleHung()
 		CRASH("Process [name] hung and was restarted.")
 	
-	if (world.cpu >= cpu_threshold)
+	// For each tick the process defers, it increments the cpu_defer_count so we don't
+	// defer indefinitely
+	if (world.cpu >= cpu_threshold + cpu_defer_count * 10)
 		sleep(1)
+		cpu_defer_count++
 		last_slept = world.timeofday
 	else
 		// If world.timeofday has rolled over, then we need to adjust.

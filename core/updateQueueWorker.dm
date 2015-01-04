@@ -6,6 +6,7 @@ datum/updateQueueWorker
 	var/tmp/list/arguments
 	var/tmp/lastStart
 	var/tmp/cpuThreshold
+	var/tmp/cpuDeferCount
 
 datum/updateQueueWorker/New(var/list/objects, var/procName, var/list/arguments, var/cpuThreshold = 90)
 	..()
@@ -18,6 +19,7 @@ datum/updateQueueWorker/proc/init(var/list/objects, var/procName, var/list/argum
 	src.procName = procName
 	src.arguments = arguments
 	src.cpuThreshold = cpuThreshold
+	cpuDeferCount = 0
 			
 	killed = 0
 	finished = 0
@@ -38,10 +40,14 @@ datum/updateQueueWorker/proc/doWork()
 	// or we were killed while running the above code, mark finished and return.
 	if (!objects || !objects.len) return finished()
 	
-	if (world.cpu > cpuThreshold)
+	if (world.cpu > cpuThreshold + cpuDeferCount * 10)
 		// We don't want to force a tick into overtime!
 		// If the tick is about to go overtime, spawn the next update to go
 		// in the next tick.
+		
+		// We don't want to defer indefinitely. Each tick the queue defers, increment the defer count so it will tolerate a little more lag
+		cpuDeferCount++
+		
 		uq_dbg("tick went into overtime with world.cpu = [world.cpu], deferred next update to next tick [1+(world.time / world.tick_lag)]")
 		
 		spawn(1)
