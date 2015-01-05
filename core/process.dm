@@ -28,6 +28,9 @@
 	// Previous status text var
 	var/tmp/previousStatus
 	
+	// 1 if process is disabled
+	var/tmp/disabled = 0
+	
 	/**
 	 * Config vars
 	 */
@@ -246,7 +249,8 @@ datum/controller/process/proc/getContextData()
 	"highestRunTime" = main.highest_run_time[src],
 	"ticks" = ticks,
 	"schedule" = schedule_interval,
-	"status" = getStatusText()
+	"status" = getStatusText(),
+	"disabled" = disabled
 	)
 	
 datum/controller/process/proc/getStatus()
@@ -300,8 +304,14 @@ datum/controller/process/proc/_copyStateFrom(var/datum/controller/process/target
 	
 datum/controller/process/proc/copyStateFrom(var/datum/controller/process/target)
 
-datum/controller/proc/onKill()
+datum/controller/process/proc/onKill()
 
-datum/controller/proc/onStart()
+datum/controller/process/proc/onStart()
 
-datum/controller/proc/onFinish()
+datum/controller/process/proc/onFinish()
+
+datum/controller/process/proc/disable()
+	disabled = 1
+
+datum/controller/process/proc/enable()
+	disabled = 0

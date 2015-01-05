@@ -101,7 +101,7 @@ var/global/datum/controller/processScheduler/processScheduler
 /datum/controller/processScheduler/proc/queueProcesses()
 	for(var/datum/controller/process/p in processes)
 		// Don't double-queue, don't queue running processes
-		if (p.running || p.queued || !p.idle)
+		if (p.disabled || p.running || p.queued || !p.idle)
 			continue
 
 		// If world.timeofday has rolled over, then we need to adjust.
@@ -291,3 +291,13 @@ var/global/datum/controller/processScheduler/processScheduler
 		newInstance._copyStateFrom(oldInstance)
 		replaceProcess(oldInstance, newInstance)
 		oldInstance.kill()
+
+/datum/controller/processScheduler/proc/enableProcess(var/processName as text)
+	if (hasProcess(processName))
+		var/datum/controller/process/process = nameToProcessMap[processName]
+		process.enable()
+		
+/datum/controller/processScheduler/proc/disableProcess(var/processName as text)
+	if (hasProcess(processName))
+		var/datum/controller/process/process = nameToProcessMap[processName]
+		process.disable()

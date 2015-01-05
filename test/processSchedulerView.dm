@@ -9,6 +9,14 @@
 			var/toKill = href_list["name"]
 			processScheduler.killProcess(toKill)
 			refreshProcessTable()
+		if ("enable")
+			var/toEnable = href_list["name"]
+			processScheduler.enableProcess(toEnable)
+			refreshProcessTable()
+		if ("disable")
+			var/toDisable = href_list["name"]
+			processScheduler.disableProcess(toDisable)
+			refreshProcessTable()
 		if ("refresh")
 			refreshProcessTable()
 
@@ -19,7 +27,7 @@
 	usr << output(data, "processSchedulerContext.browser:[function]")
 
 /datum/processSchedulerView/proc/getProcessTable()
-	var/text = "<table class=\"table table-striped\"><thead><tr><td>Name</td><td>Avg(s)</td><td>Last(s)</td><td>Highest(s)</td><td>Tickcount</td><td>Tickrate</td><td>State</td><td>Kill</td></tr></thead><tbody>"
+	var/text = "<table class=\"table table-striped\"><thead><tr><td>Name</td><td>Avg(s)</td><td>Last(s)</td><td>Highest(s)</td><td>Tickcount</td><td>Tickrate</td><td>State</td><td>Action</td></tr></thead><tbody>"
 	// and the context of each
 	for (var/list/data in processScheduler.getStatusData())
 		text += "<tr>"
@@ -30,7 +38,12 @@
 		text += "<td>[num2text(data["ticks"],4)]</td>"
 		text += "<td>[data["schedule"]]</td>"
 		text += "<td>[data["status"]]</td>"
-		text += "<td><button class=\"btn kill-btn\" data-process-name=\"[data["name"]]\" id=\"kill-[data["name"]]\">Kill</button></td>"
+		text += "<td><button class=\"btn kill-btn\" data-process-name=\"[data["name"]]\" id=\"kill-[data["name"]]\">Kill</button>"
+		if (data["disabled"])
+			text += "<button class=\"btn enable-btn\" data-process-name=\"[data["name"]]\" id=\"enable-[data["name"]]\">Enable</button>"
+		else
+			text += "<button class=\"btn disable-btn\" data-process-name=\"[data["name"]]\" id=\"disable-[data["name"]]\">Disable</button>"
+		text += "</td>"
 		text += "</tr>"
 
 	text += "</tbody></table>"
