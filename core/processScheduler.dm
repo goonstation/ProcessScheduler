@@ -34,7 +34,7 @@ var/global/datum/controller/processScheduler/processScheduler
 
 	// Controls whether the scheduler is running or not
 	var/tmp/isRunning = 0
-	
+
 	// Setup for these processes will be deferred until all the other processes are set up.
 	var/tmp/list/deferredSetupList = new
 
@@ -82,7 +82,10 @@ var/global/datum/controller/processScheduler/processScheduler
 /datum/controller/processScheduler/proc/checkRunningProcesses()
 	for(var/datum/controller/process/p in running)
 		p.update()
-
+		
+		if (isnull(p)) // Process was killed
+			continue
+			
 		var/status = p.getStatus()
 		var/previousStatus = p.getPreviousStatus()
 
@@ -104,7 +107,7 @@ var/global/datum/controller/processScheduler/processScheduler
 		// If world.timeofday has rolled over, then we need to adjust.
 		if (world.timeofday < last_start[p])
 			last_start[p] -= 864000
-			
+
 		// If the process should be running by now, go ahead and queue it
 		if (world.timeofday > last_start[p] + p.schedule_interval)
 			setQueuedProcessState(p)
@@ -137,6 +140,38 @@ var/global/datum/controller/processScheduler/processScheduler
 
 	// Save process in the name -> process map
 	nameToProcessMap[process.name] = process
+
+/datum/controller/processScheduler/proc/replaceProcess(var/datum/controller/process/oldProcess, var/datum/controller/process/newProcess)
+	processes.Remove(oldProcess)
+	processes.Add(newProcess)
+
+	newProcess.idle()
+	idle.Remove(oldProcess)
+	running.Remove(oldProcess)
+	queued.Remove(oldProcess)
+	idle.Add(newProcess)
+
+	last_start.Remove(oldProcess)
+	last_start.Add(newProcess)
+	last_start[newProcess] = 0
+
+	last_run_time.Add(newProcess)
+	last_run_time[newProcess] = last_run_time[oldProcess]
+	last_run_time.Remove(oldProcess)
+
+	last_twenty_run_times.Add(newProcess)
+	last_twenty_run_times[newProcess] = last_twenty_run_times[oldProcess]
+	last_twenty_run_times.Remove(oldProcess)
+
+	highest_run_time.Add(newProcess)
+	highest_run_time[newProcess] = highest_run_time[oldProcess]
+	highest_run_time.Remove(oldProcess)
+
+	recordStart(newProcess, 0)
+	recordEnd(newProcess, 0)
+
+	nameToProcessMap[newProcess.name] = newProcess
+
 
 /datum/controller/processScheduler/proc/runProcess(var/datum/controller/process/process)
 	spawn(0)
@@ -190,7 +225,7 @@ var/global/datum/controller/processScheduler/processScheduler
 	// If world.timeofday has rolled over, then we need to adjust.
 	if (time < last_start[process])
 		last_start[process] -= 864000
-		
+
 	var/lastRunTime = time - last_start[process]
 
 	if(lastRunTime < 0)
@@ -242,7 +277,17 @@ var/global/datum/controller/processScheduler/processScheduler
 /datum/controller/processScheduler/proc/getProcessCount()
 	return processes.len
 
-/datum/controller/processScheduler/proc/killProcess(var/processName as text)
+/datum/controller/processScheduler/proc/hasProcess(var/processName as text)
 	if (nameToProcessMap[processName])
-		var/datum/controller/process/p = nameToProcessMap[processName]
-		p.kill()
+		return 1
+
+/datum/controller/processScheduler/proc/killProcess(var/processName as text)
+	restartProcess(processName)
+
+/datum/controller/processScheduler/proc/restartProcess(var/processName as text)
+	if (hasProcess(processName))
+		var/datum/controller/process/oldInstance = nameToProcessMap[processName]
+		var/datum/controller/process/newInstance = new oldInstance.type(src)
+		newInstance._copyStateFrom(oldInstance)
+		replaceProcess(oldInstance, newInstance)
+		oldInstance.kill()

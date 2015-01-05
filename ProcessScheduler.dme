@@ -27,5 +27,6 @@
 #include "test\testSlowProcess.dm"
 #include "test\testUpdateQueue.dm"
 #include "test\testUpdateQueueProcess.dm"
+#include "test\testZombieProcess.dm"
 // END_INCLUDE
 

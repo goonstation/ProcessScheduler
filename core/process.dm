@@ -19,6 +19,9 @@
 	// 1 if process is blocked up
 	var/tmp/hung = 0
 	
+	// 1 if process was killed
+	var/tmp/killed = 0
+	
 	// Status text var
 	var/tmp/status
 	
@@ -68,6 +71,9 @@
 	
 	// Records the time (s-ticks) at which the process last began running
 	var/tmp/run_start = 0
+	
+	// Records the number of times this process has been killed and restarted
+	var/tmp/times_killed
 	 
 	// Tick count
 	var/tmp/ticks = 0
@@ -103,10 +109,14 @@ datum/controller/process/proc/started()
 	running()
 	main.processStarted(src)
 	
+	onStart()
+	
 datum/controller/process/proc/finished()
 	ticks++
 	idle()
 	main.processFinished(src)
+	
+	onFinish()
 	
 datum/controller/process/proc/doWork()
 		
@@ -156,20 +166,28 @@ datum/controller/process/proc/handleHung()
 	logTheThing("debug", null, null, msg)
 	logTheThing("diary", null, null, msg, "debug")
 	message_admins(msg)
-	kill()
+	
+	main.restartProcess(src.name)
 		
 datum/controller/process/proc/kill()
-	var/msg = "[name] process was killed at tick #[ticks]."
-	logTheThing("debug", null, null, msg)
-	logTheThing("diary", null, null, msg, "debug")
-	finished()
+	if (!killed)
+		var/msg = "[name] process was killed at tick #[ticks]."
+		logTheThing("debug", null, null, msg)
+		logTheThing("diary", null, null, msg, "debug")
+		//finished()
+		
+		// Allow inheritors to clean up if needed
+		onKill()
+		
+		// This should del
+		del(src)
 		
 datum/controller/process/proc/scheck(var/tickId = 0)
-	if (tickId > 0 && ticks != tickId)
-		// If the scheduler starts a new instance of this process, 
-		// the tickId will increment, and we can detect that and bail out
-		// of a killed process here.
-		CRASH("Process [name] at tick #[tickId] detected that it was killed and was restarted.")
+	if (killed)
+		// The kill proc is the only place where killed is set. 
+		// The kill proc should have deleted this datum, and all sleeping procs that are
+		// owned by it.
+		CRASH("A killed process is still running somehow...")
 	if (hung)
 		// This will only really help if the doWork proc ends up in an infinite loop.
 		handleHung()
@@ -266,3 +284,24 @@ datum/controller/process/proc/setStatus(var/newStatus)
 datum/controller/process/proc/setLastTask(var/task, var/object)
 	last_task = task
 	last_object = object
+	
+datum/controller/process/proc/_copyStateFrom(var/datum/controller/process/target)
+	main = target.main
+	name = target.name
+	schedule_interval = target.schedule_interval
+	sleep_interval = target.sleep_interval
+	last_slept = 0
+	run_start = 0
+	times_killed = target.times_killed
+	ticks = target.ticks
+	last_task = target.last_task
+	last_object = target.last_object
+	copyStateFrom(target)
+	
+datum/controller/process/proc/copyStateFrom(var/datum/controller/process/target)
+
+datum/controller/proc/onKill()
+
+datum/controller/proc/onStart()
+
+datum/controller/proc/onFinish()
