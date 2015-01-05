@@ -8,9 +8,16 @@ This is a mostly self-contained, fairly well-documented implementation of the ma
 
 ##LICENSE
 
+This work is released under the following licenses.
+
 [![Creative Commons License](https://licensebuttons.net/l/by-nc/4.0/80x15.png)](http://creativecommons.org/licenses/by-nc/4.0/)
 
-This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by-nc/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
+This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License. The complete text of this license is included in the file LICENSE-CC-BY-NC.
+
+
+[![Affero GPL Version 3](http://www.gnu.org/graphics/agplv3-88x31.png)](http://www.gnu.org/licenses/agpl-3.0.html)
+
+This work is licensed under the Affero General Public License 3.0. The complete text of the license is included in the file LICENSE-AGPL.
 
 ##INSTALLATION
 
@@ -71,5 +78,9 @@ The updateQueue works by spawn(0)'ing your specified update proc, but it only pu
 
 ##Contributing
 
-I welcome pull requests and issue reports, and will try to merge/fix them as I have time. 
+I welcome pull requests and issue reports, and will try to merge/fix them as I have time.
+
+### Licensing for code submitted via PR:
+
+By submitting a pull request, you agree to release all original code submitted in the pull request under the [MIT License](http://opensource.org/licenses/MIT). You also agree that any code submitted is either your own work, or is public domain or under a equally or less restrictive license than the MIT license, or that you have the express written permission of the authors of the submitted code to submit the pull request.
 
