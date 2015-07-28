@@ -20,7 +20,7 @@ datum/updateQueueWorker/proc/init(var/list/objects, var/procName, var/list/argum
 	src.arguments = arguments
 	src.cpuThreshold = cpuThreshold
 	cpuDeferCount = 0
-			
+
 	killed = 0
 	finished = 0
 
@@ -28,7 +28,7 @@ datum/updateQueueWorker/proc/doWork()
 	// If there's nothing left to execute or we were killed, mark finished and return.
 	if (!objects || !objects.len) return finished()
 
-	lastStart = world.timeofday // Absolute number of ticks since the world started up
+	lastStart = TimeOfDay // Absolute number of ticks since the world started up
 
 	var/datum/object = objects[objects.len] // Pull out the object
 	objects.len-- // Remove the object from the list
@@ -39,17 +39,17 @@ datum/updateQueueWorker/proc/doWork()
 	// If there's nothing left to execute
 	// or we were killed while running the above code, mark finished and return.
 	if (!objects || !objects.len) return finished()
-	
+
 	if (world.cpu > cpuThreshold + cpuDeferCount * 10)
 		// We don't want to force a tick into overtime!
 		// If the tick is about to go overtime, spawn the next update to go
 		// in the next tick.
-		
+
 		// We don't want to defer indefinitely. Each tick the queue defers, increment the defer count so it will tolerate a little more lag
 		cpuDeferCount++
-		
+
 		uq_dbg("tick went into overtime with world.cpu = [world.cpu], deferred next update to next tick [1+(world.time / world.tick_lag)]")
-		
+
 		spawn(1)
 			doWork()
 	else

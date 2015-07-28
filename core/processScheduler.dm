@@ -38,6 +38,16 @@ var/global/datum/controller/processScheduler/processScheduler
 	// Setup for these processes will be deferred until all the other processes are set up.
 	var/tmp/list/deferredSetupList = new
 
+	var/tmp/currentTick = 0
+
+	var/tmp/currentTickStart = 0
+
+	var/tmp/timeAllowance = 0
+
+/datum/controller/processScheduler/New()
+	..()
+	scheduler_sleep_interval = world.tick_lag
+
 /**
  * deferSetupFor
  * @param path processPath
@@ -301,3 +311,17 @@ var/global/datum/controller/processScheduler/processScheduler
 	if (hasProcess(processName))
 		var/datum/controller/process/process = nameToProcessMap[processName]
 		process.disable()
+
+/datum/controller/processScheduler/proc/getCurrentTickElapsedTime()
+	if (world.time > currentTick)
+		// New tick!
+		currentTick = world.time
+		currentTickStart = TimeOfDay
+		updateTimeAllowance()
+		return 0
+	else
+		return TimeOfDay - currentTickStart
+
+/datum/controller/processScheduler/proc/updateTimeAllowance()
+	// Time allowance goes down linearly with world.cpu.
+	timeAllowance = world.tick_lag * min(1, 0.5 * ((200/max(1,world.cpu)) - 1))

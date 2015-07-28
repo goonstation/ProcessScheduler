@@ -48,7 +48,7 @@
 	// This controls how often the process will yield (call sleep(0)) while it is running.
 	// Every concurrent process should sleep periodically while running in order to allow other
 	// processes to execute concurrently.
-	var/tmp/sleep_interval = PROCESS_DEFAULT_SLEEP_INTERVAL
+	var/tmp/sleep_interval
 
 	// hang_warning_time - this is the time (in 1/10 seconds) after which the server will begin to show "maybe hung" in the context window
 	var/tmp/hang_warning_time = PROCESS_DEFAULT_HANG_WARNING_TIME
@@ -69,10 +69,10 @@
 	 * recordkeeping vars
 	 */
 
-	// Records the time (server ticks) at which the process last finished sleeping
+	// Records the time (1/10s timeofday) at which the process last finished sleeping
 	var/tmp/last_slept = 0
 
-	// Records the time (s-ticks) at which the process last began running
+	// Records the time (1/10s timeofday) at which the process last began running
 	var/tmp/run_start = 0
 
 	// Records the number of times this process has been killed and restarted
@@ -92,7 +92,7 @@ datum/controller/process/New(var/datum/controller/processScheduler/scheduler)
 	idle()
 	name = "process"
 	schedule_interval = 50
-	sleep_interval = 2
+	sleep_interval = world.tick_lag / PROCESS_DEFAULT_SLEEP_INTERVAL
 	last_slept = 0
 	run_start = 0
 	ticks = 0
@@ -163,9 +163,7 @@ datum/controller/process/proc/handleHung()
 
 	// If world.timeofday has rolled over, then we need to adjust.
 	if (TimeOfDay < run_start)
-		world << "adjusting run_start: [run_start] to [run_start - 864000], TimeOfDay: [TimeOfDay]"
 		run_start -= 864000
-	world << "global.lastTimeOfDay: [global.lastTimeOfDay] TimeOfDay: [TimeOfDay] run_start: [run_start]"
 	var/msg = "[name] process hung at tick #[ticks]. Process was unresponsive for [(TimeOfDay - run_start) / 10] seconds and was restarted. Last task: [last_task]. Last Object Type: [lastObjType]"
 	logTheThing("debug", null, null, msg)
 	logTheThing("diary", null, null, msg, "debug")
@@ -199,8 +197,9 @@ datum/controller/process/proc/scheck(var/tickId = 0)
 
 	// For each tick the process defers, it increments the cpu_defer_count so we don't
 	// defer indefinitely
-	if (world.cpu >= cpu_threshold + cpu_defer_count * 10)
-		sleep(1)
+	//if (world.cpu >= cpu_threshold + cpu_defer_count * 10)
+	if (main.getCurrentTickElapsedTime() > main.timeAllowance)
+		sleep(world.tick_lag)
 		cpu_defer_count++
 		last_slept = TimeOfDay
 	else
