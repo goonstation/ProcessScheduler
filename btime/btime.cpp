@@ -31,7 +31,7 @@ int timeofday(struct timeval * tp)
 {
     gettimeofday(tp, NULL);
     tp->tv_sec = tp->tv_sec % 86400;
-    return 0
+    return 0;
 }
 #endif
 
