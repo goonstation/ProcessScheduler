@@ -1,0 +1,9 @@
+To build on windows:
+
+Using a recent version of VC++, such as 2012, 2013, or 2015, open btime.vcxproj, switch to release configuration, and compile. The dll will be output in the Release folder.
+
+To build on linux:
+
+Ensure the build environment is installed and g++ is available. On debian/ubuntu machines, installing build-essential should be sufficient.
+
+Run build.sh and copy the resulting btime.so file to the same folder as the .dmb you will use it with is in.

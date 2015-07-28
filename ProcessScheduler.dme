@@ -22,6 +22,7 @@
 #include "test\processSchedulerView.dm"
 #include "test\testDyingUpdateQueueProcess.dm"
 #include "test\testHarness.dm"
+#include "test\testHeavyProcess.dm"
 #include "test\testHungProcess.dm"
 #include "test\testNiceProcess.dm"
 #include "test\testSlowProcess.dm"

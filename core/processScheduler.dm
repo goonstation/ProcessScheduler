@@ -46,7 +46,7 @@ var/global/datum/controller/processScheduler/processScheduler
  * this treatment.
  */
 /datum/controller/processScheduler/proc/deferSetupFor(var/processPath)
-	if (!processPath in deferredSetupList)
+	if (!(processPath in deferredSetupList))
 		deferredSetupList += processPath
 
 /datum/controller/processScheduler/proc/setup()
@@ -82,10 +82,10 @@ var/global/datum/controller/processScheduler/processScheduler
 /datum/controller/processScheduler/proc/checkRunningProcesses()
 	for(var/datum/controller/process/p in running)
 		p.update()
-		
+
 		if (isnull(p)) // Process was killed
 			continue
-			
+
 		var/status = p.getStatus()
 		var/previousStatus = p.getPreviousStatus()
 
@@ -105,11 +105,11 @@ var/global/datum/controller/processScheduler/processScheduler
 			continue
 
 		// If world.timeofday has rolled over, then we need to adjust.
-		if (world.timeofday < last_start[p])
+		if (TimeOfDay < last_start[p])
 			last_start[p] -= 864000
 
 		// If the process should be running by now, go ahead and queue it
-		if (world.timeofday > last_start[p] + p.schedule_interval)
+		if (TimeOfDay > last_start[p] + p.schedule_interval)
 			setQueuedProcessState(p)
 
 /datum/controller/processScheduler/proc/runQueuedProcesses()
@@ -214,13 +214,13 @@ var/global/datum/controller/processScheduler/processScheduler
 
 /datum/controller/processScheduler/proc/recordStart(var/datum/controller/process/process, var/time = null)
 	if (isnull(time))
-		time = world.timeofday
+		time = TimeOfDay
 
 	last_start[process] = time
 
 /datum/controller/processScheduler/proc/recordEnd(var/datum/controller/process/process, var/time = null)
 	if (isnull(time))
-		time = world.timeofday
+		time = TimeOfDay
 
 	// If world.timeofday has rolled over, then we need to adjust.
 	if (time < last_start[process])
@@ -296,7 +296,7 @@ var/global/datum/controller/processScheduler/processScheduler
 	if (hasProcess(processName))
 		var/datum/controller/process/process = nameToProcessMap[processName]
 		process.enable()
-		
+
 /datum/controller/processScheduler/proc/disableProcess(var/processName as text)
 	if (hasProcess(processName))
 		var/datum/controller/process/process = nameToProcessMap[processName]
