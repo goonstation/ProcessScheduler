@@ -4,13 +4,14 @@
 #include <malloc.h>
 #include "btime.h"
 #include <time.h>
-#include <sstream>
+#include <stdio.h>
 
 using namespace std;
 
 #ifdef WIN32
 #include <Windows.h>
 #include <stdint.h>
+#define snprintf _snprintf
 
 int timeofday(struct timeval * tp)
 {
@@ -29,31 +30,25 @@ int timeofday(struct timeval * tp)
 
 int timeofday(struct timeval * tp)
 {
-    gettimeofday(tp, NULL);
-    tp->tv_sec = tp->tv_sec % 86400;
-    return 0;
+  gettimeofday(tp, NULL);
+  tp->tv_sec = tp->tv_sec % 86400;
+  return 0;
 }
 #endif
 
-EXPORT char *byond_gettime(void)
+EXPORT char * byond_gettime(void)
 {
-	timeval *t;
-
-	t = (timeval*) malloc(sizeof t);
-	timeofday(t);
+	timeval t;
+	timeval* tp = &t;
+	timeofday(&t);
 	
-    std::stringstream ss;
-	ss << t->tv_sec;
-	ss << ".";
-	ss << t->tv_usec;
-	//ss << timeofday;
-	char *p = new char[ss.str().size()+1];
-	strcpy(p, ss.str().c_str());
-	return p;
+  static char buf[11];
+  snprintf(buf, 11, "%d.%-4d", tp->tv_sec, tp->tv_usec);
+  return buf;
 }
 
 // C export
-extern "C" EXPORT char *gettime(int argc, char *argv[]) 
+extern "C" EXPORT char * gettime(int argc, char *argv[]) 
 {
 	return byond_gettime();
 }
