@@ -15,11 +15,11 @@ using namespace std;
 
 int timeofday(struct timeval * tp)
 {
-    // Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
-    static const uint64_t EPOCH = ((uint64_t) 116444736000000000ULL);
+	// Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
+	static const uint64_t EPOCH = ((uint64_t)116444736000000000ULL);
 
-    SYSTEMTIME  system_time;
-	GetSystemTime( &system_time);
+	SYSTEMTIME  system_time;
+	GetSystemTime(&system_time);
 	tp->tv_sec = (int)system_time.wHour * 60 * 60 + (int)system_time.wMinute * 60 + (int)system_time.wSecond;
 	tp->tv_usec = (int)system_time.wMilliseconds;
 	return 0;
@@ -30,9 +30,9 @@ int timeofday(struct timeval * tp)
 
 int timeofday(struct timeval * tp)
 {
-  gettimeofday(tp, NULL);
-  tp->tv_sec = tp->tv_sec % 86400;
-  return 0;
+	gettimeofday(tp, NULL);
+	tp->tv_sec = tp->tv_sec % 86400;
+	return 0;
 }
 #endif
 
@@ -41,14 +41,16 @@ EXPORT char * byond_gettime(void)
 	timeval t;
 	timeval* tp = &t;
 	timeofday(&t);
-	
-  static char buf[11];
-  snprintf(buf, 11, "%d.%-4d", tp->tv_sec, tp->tv_usec);
-  return buf;
+
+	static char buf[11];
+	static double amount;
+	amount = 10 * (tp->tv_sec % 3600 + (double)tp->tv_usec * 0.001);
+	snprintf(buf, 11, "%f", amount);
+	return buf;
 }
 
 // C export
-extern "C" EXPORT char * gettime(int argc, char *argv[]) 
+extern "C" EXPORT char * gettime(int argc, char *argv[])
 {
 	return byond_gettime();
 }

@@ -20,13 +20,13 @@
 #define PRECISE_TIMER_AVAILABLE
 
 #ifdef PRECISE_TIMER_AVAILABLE
-var/global/lastTimeOfDay = 0
-#define TimeOfDay __extern__timeofday()
-
-proc/__extern__timeofday()
-	if (prob(5) || world.timeofday > global.lastTimeOfDay)
-		global.lastTimeOfDay = max(global.lastTimeOfDay, text2num(call("btime.[world.system_type==MS_WINDOWS?"dll":"so"]", "gettime")()) * 10)
-	return global.lastTimeOfDay
+var/global/lastTimeOfHour = 0
+#define TimeOfHour __btime__timeofhour()
+#define __extern__timeofhour text2num(call("btime.[world.system_type==MS_WINDOWS?"dll":"so"]", "gettime")())
+proc/__btime__timeofhour()
+	if (prob(5) || ((world.timeofday % 36000) > global.lastTimeOfHour))
+		global.lastTimeOfHour = __extern__timeofhour
+	return global.lastTimeOfHour
 #else
-#define TimeOfDay world.timeofday
+#define TimeOfHour world.timeofday % 36000
 #endif

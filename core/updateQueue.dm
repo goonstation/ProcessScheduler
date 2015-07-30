@@ -86,10 +86,10 @@
 /datum/updateQueue/proc/checkWorker()
 	if(istype(currentWorker))
 		// If TimeOfDay has rolled over, then we need to adjust.
-		if(TimeOfDay < currentWorker.lastStart)
-			currentWorker.lastStart -= 864000
+		if(TimeOfHour < currentWorker.lastStart)
+			currentWorker.lastStart -= 36000
 
-		if(TimeOfDay - currentWorker.lastStart > adjustedWorkerTimeout)
+		if(TimeOfHour - currentWorker.lastStart > adjustedWorkerTimeout)
 			// This worker is a bit slow, let's spawn a new one and kill the old one.
 			uq_dbg("Current worker is lagging... starting a new one.")
 			killWorker()

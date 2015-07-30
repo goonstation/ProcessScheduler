@@ -101,10 +101,10 @@ datum/controller/process/New(var/datum/controller/processScheduler/scheduler)
 
 datum/controller/process/proc/started()
 	// Initialize last_slept so we can know when to sleep
-	last_slept = TimeOfDay
+	last_slept = TimeOfHour
 
 	// Initialize run_start so we can detect hung processes.
-	run_start = TimeOfDay
+	run_start = TimeOfHour
 
 	// Initialize defer count
 	cpu_defer_count = 0
@@ -162,9 +162,9 @@ datum/controller/process/proc/handleHung()
 		lastObjType = lastObj.type
 
 	// If world.timeofday has rolled over, then we need to adjust.
-	if (TimeOfDay < run_start)
-		run_start -= 864000
-	var/msg = "[name] process hung at tick #[ticks]. Process was unresponsive for [(TimeOfDay - run_start) / 10] seconds and was restarted. Last task: [last_task]. Last Object Type: [lastObjType]"
+	if (TimeOfHour < run_start)
+		run_start -= 36000
+	var/msg = "[name] process hung at tick #[ticks]. Process was unresponsive for [(TimeOfHour - run_start) / 10] seconds and was restarted. Last task: [last_task]. Last Object Type: [lastObjType]"
 	logTheThing("debug", null, null, msg)
 	logTheThing("diary", null, null, msg, "debug")
 	message_admins(msg)
@@ -195,22 +195,24 @@ datum/controller/process/proc/scheck(var/tickId = 0)
 		handleHung()
 		CRASH("Process [name] hung and was restarted.")
 
+	var/tmp/slept = 0
 	// For each tick the process defers, it increments the cpu_defer_count so we don't
 	// defer indefinitely
 	//if (world.cpu >= cpu_threshold + cpu_defer_count * 10)
 	if (main.getCurrentTickElapsedTime() > main.timeAllowance)
-		sleep(world.tick_lag)
+		sleep(world.tick_lag*1)
 		cpu_defer_count++
-		last_slept = TimeOfDay
+		last_slept = TimeOfHour
+		slept = 1
 	else
 		// If world.timeofday has rolled over, then we need to adjust.
-		if (TimeOfDay < last_slept)
-			last_slept -= 864000
+		if (TimeOfHour < last_slept)
+			last_slept -= 36000
 
-		if (TimeOfDay > last_slept + sleep_interval)
+		if (TimeOfHour > last_slept + sleep_interval)
 			// If we haven't slept in sleep_interval ticks, sleep to allow other work to proceed.
 			sleep(0)
-			last_slept = TimeOfDay
+			last_slept = TimeOfHour
 
 datum/controller/process/proc/update()
 	// Clear delta
@@ -231,9 +233,9 @@ datum/controller/process/proc/update()
 
 
 datum/controller/process/proc/getElapsedTime()
-	if (TimeOfDay < run_start)
-		return TimeOfDay - (run_start - 864000)
-	return TimeOfDay - run_start
+	if (TimeOfHour < run_start)
+		return TimeOfHour - (run_start - 36000)
+	return TimeOfHour - run_start
 
 datum/controller/process/proc/tickDetail()
 	return
