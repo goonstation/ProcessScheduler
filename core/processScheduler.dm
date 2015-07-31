@@ -87,10 +87,11 @@ var/global/datum/controller/processScheduler/processScheduler
 
 /datum/controller/processScheduler/proc/process()
 	updateCurrentTickData()
-	for(var/i=world.tick_lag*10,i<world.tick_lag*50,i+=world.tick_lag)
+	
+	for(var/i=world.tick_lag,i<world.tick_lag*50,i+=world.tick_lag)
 		spawn(i) updateCurrentTickData()
 	while(isRunning)
-		// Hopefully spawning this for 1 tick in the future will make it the first thing in the queue.
+		// Hopefully spawning this for 50 ticks in the future will make it the first thing in the queue.
 		spawn(world.tick_lag*50) updateCurrentTickData()
 		checkRunningProcesses()
 		queueProcesses()

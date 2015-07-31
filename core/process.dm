@@ -195,22 +195,19 @@ datum/controller/process/proc/scheck(var/tickId = 0)
 		handleHung()
 		CRASH("Process [name] hung and was restarted.")
 
-	var/tmp/slept = 0
 	// For each tick the process defers, it increments the cpu_defer_count so we don't
 	// defer indefinitely
-	//if (world.cpu >= cpu_threshold + cpu_defer_count * 10)
 	if (main.getCurrentTickElapsedTime() > main.timeAllowance)
 		sleep(world.tick_lag*1)
 		cpu_defer_count++
 		last_slept = TimeOfHour
-		slept = 1
 	else
 		// If world.timeofday has rolled over, then we need to adjust.
 		if (TimeOfHour < last_slept)
 			last_slept -= 36000
 
 		if (TimeOfHour > last_slept + sleep_interval)
-			// If we haven't slept in sleep_interval ticks, sleep to allow other work to proceed.
+			// If we haven't slept in sleep_interval deciseconds, sleep to allow other work to proceed.
 			sleep(0)
 			last_slept = TimeOfHour
 

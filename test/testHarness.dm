@@ -30,11 +30,6 @@ mob
 			set name = "Get Process Scheduler Status Panel"
 			processSchedulerView.getContext()
 
-		runUpdateQueueTests()
-			set name = "Run Update Queue Testsuite"
-			var/datum/updateQueueTests/t = new
-			t.runTests()
-
 		stopProcessScheduler()
 			processScheduler.isRunning = 0
 
