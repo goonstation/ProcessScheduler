@@ -13,16 +13,15 @@ using namespace std;
 #include <stdint.h>
 #define snprintf _snprintf
 
-int timeofday(struct timeval * tp)
+double timeofhour()
 {
 	// Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
 	static const uint64_t EPOCH = ((uint64_t)116444736000000000ULL);
-
+	static double timeofhour;
 	SYSTEMTIME  system_time;
 	GetSystemTime(&system_time);
-	tp->tv_sec = (int)system_time.wHour * 60 * 60 + (int)system_time.wMinute * 60 + (int)system_time.wSecond;
-	tp->tv_usec = (int)system_time.wMilliseconds;
-	return 0;
+	timeofhour = ((int)system_time.wHour * 60 * 60 + (int)system_time.wMinute * 60 + (int)system_time.wSecond) % 3600 + (double)system_time.wMilliseconds / 1000;
+	return timeofhour;
 }
 #else
 #include <sys/time.h>
@@ -38,13 +37,9 @@ int timeofday(struct timeval * tp)
 
 EXPORT char * byond_gettime(void)
 {
-	timeval t;
-	timeval* tp = &t;
-	timeofday(&t);
-
 	static char buf[11];
 	static double amount;
-	amount = 10 * (tp->tv_sec % 3600 + (double)tp->tv_usec * 0.001);
+	amount = 10 * timeofhour();
 	snprintf(buf, 11, "%f", amount);
 	return buf;
 }
