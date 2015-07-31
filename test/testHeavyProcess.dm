@@ -9,9 +9,9 @@
 	schedule_interval = 29 // every second
 
 /datum/controller/process/testHeavyProcess/doWork()
-	var/tmp/v
+	var/tmp/v = 1
 	for(var/i=0,i<10000000,i++) // Just to pretend we're doing something
-		v = 1
+		v = v
 		if (!(i % 1000)) // Don't scheck too damn much, because we're doing effectively nothing here.
 			scheck()
 
