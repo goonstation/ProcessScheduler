@@ -1,10 +1,10 @@
 all: compile link
 
 compile:
-        g++ -fPIC -c btime.cpp
+        g++ -fPIC -O3 -c btime.cpp
 
 link:
-        g++ btime.o -m32 -lstdc++ -shared -Wl,-soname,btime.so -o btime.so
+        g++ btime.o -O3 -m32 -lstdc++ -lrt -shared -Wl,-soname,btime.so -o btime.so
 
 install:
         cp btime.so /usr/local/lib

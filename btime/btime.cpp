@@ -20,18 +20,25 @@ double timeofhour()
 	static double timeofhour;
 	SYSTEMTIME  system_time;
 	GetSystemTime(&system_time);
-	timeofhour = ((int)system_time.wHour * 60 * 60 + (int)system_time.wMinute * 60 + (int)system_time.wSecond) % 3600 + (double)system_time.wMilliseconds / 1000;
+	timeofhour = ((int)system_time.wHour * 60 * 60 + (int)system_time.wMinute * 60 + (int)system_time.wSecond) % 3600 + (double)system_time.wMilliseconds / (double)1000;
 	return timeofhour;
 }
 #else
 #include <sys/time.h>
 #include <string.h>
 
-int timeofday(struct timeval * tp)
+double timeofhour()
 {
-	gettimeofday(tp, NULL);
-	tp->tv_sec = tp->tv_sec % 86400;
-	return 0;
+	static struct timespec ts;
+	timespec* tsp = &ts;
+	static double timeofhour;
+	static struct tm t;
+	tm* tp = &t;
+	static const double nsec = 1000000000;
+	clock_gettime(CLOCK_MONOTONIC, tsp);
+	localtime_r(&(tsp->tv_sec), tp);
+	timeofhour = ((int)tp->tm_hour * 3600 + (int)tp->tm_min * 60 + (int)tp->tm_sec) % 3600 + (double)tsp->tv_nsec / nsec;
+	return timeofhour;
 }
 #endif
 
