@@ -1,7 +1,7 @@
 // btime.cpp : Defines the exported functions for the DLL application.
 //
 
-#include <malloc.h>
+#include <stdlib.h>
 #include "btime.h"
 #include <time.h>
 #include <stdio.h>
