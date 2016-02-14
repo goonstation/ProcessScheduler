@@ -103,7 +103,7 @@ var/global/datum/controller/processScheduler/processScheduler
 
 /datum/controller/processScheduler/proc/checkRunningProcesses()
 	for(var/process in running)
-		var/datum/controller/process/P = var/process
+		var/datum/controller/process/P = process
 		P.update()
 
 		if (isnull(P)) // Process was killed
@@ -123,7 +123,7 @@ var/global/datum/controller/processScheduler/processScheduler
 
 /datum/controller/processScheduler/proc/queueProcesses()
 	for(var/process in processes)
-		var/datum/controller/process/P = var/process
+		var/datum/controller/process/P = process
 		// Don't double-queue, don't queue running processes
 		if (P.disabled || P.running || P.queued || !P.idle)
 			continue
@@ -138,7 +138,7 @@ var/global/datum/controller/processScheduler/processScheduler
 
 /datum/controller/processScheduler/proc/runQueuedProcesses()
 	for(var/process in queued)
-		var/datum/controller/process/P = var/process
+		var/datum/controller/process/P = process
 		runProcess(P)
 
 /datum/controller/processScheduler/proc/addProcess(var/datum/controller/process/process)
