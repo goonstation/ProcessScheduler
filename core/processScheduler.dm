@@ -102,41 +102,44 @@ var/global/datum/controller/processScheduler/processScheduler
 	isRunning = 0
 
 /datum/controller/processScheduler/proc/checkRunningProcesses()
-	for(var/datum/controller/process/p in running)
-		p.update()
+	for(var/process in running)
+		var/datum/controller/process/P = var/process
+		P.update()
 
-		if (isnull(p)) // Process was killed
+		if (isnull(P)) // Process was killed
 			continue
 
-		var/status = p.getStatus()
-		var/previousStatus = p.getPreviousStatus()
+		var/status = P.getStatus()
+		var/previousStatus = P.getPreviousStatus()
 
 		// Check status changes
 		if(status != previousStatus)
 			//Status changed.
 			switch(status)
 				if(PROCESS_STATUS_PROBABLY_HUNG)
-					message_admins("Process '[p.name]' may be hung.")
+					message_admins("Process '[P.name]' may be hung.")
 				if(PROCESS_STATUS_HUNG)
-					message_admins("Process '[p.name]' is hung and will be restarted.")
+					message_admins("Process '[P.name]' is hung and will be restarted.")
 
 /datum/controller/processScheduler/proc/queueProcesses()
-	for(var/datum/controller/process/p in processes)
+	for(var/process in processes)
+		var/datum/controller/process/P = var/process
 		// Don't double-queue, don't queue running processes
-		if (p.disabled || p.running || p.queued || !p.idle)
+		if (P.disabled || P.running || P.queued || !P.idle)
 			continue
 
 		// If world.timeofday has rolled over, then we need to adjust.
-		if (TimeOfHour < last_start[p])
-			last_start[p] -= 36000
+		if (TimeOfHour < last_start[P])
+			last_start[P] -= 36000
 
 		// If the process should be running by now, go ahead and queue it
-		if (TimeOfHour > last_start[p] + p.schedule_interval)
-			setQueuedProcessState(p)
+		if (TimeOfHour > last_start[P] + P.schedule_interval)
+			setQueuedProcessState(P)
 
 /datum/controller/processScheduler/proc/runQueuedProcesses()
-	for(var/datum/controller/process/p in queued)
-		runProcess(p)
+	for(var/process in queued)
+		var/datum/controller/process/P = var/process
+		runProcess(P)
 
 /datum/controller/processScheduler/proc/addProcess(var/datum/controller/process/process)
 	processes.Add(process)
@@ -290,9 +293,10 @@ var/global/datum/controller/processScheduler/processScheduler
 /datum/controller/processScheduler/proc/getStatusData()
 	var/list/data = new
 
-	for (var/datum/controller/process/p in processes)
+	for (var/process in processes)
+		var/datum/controller/process/P = process
 		data.len++
-		data[data.len] = p.getContextData()
+		data[data.len] = P.getContextData()
 
 	return data
 
