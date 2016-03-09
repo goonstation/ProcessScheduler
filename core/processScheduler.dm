@@ -42,17 +42,11 @@ var/global/datum/controller/processScheduler/processScheduler
 
 	var/tmp/currentTickStart = 0
 
-	var/tmp/timeAllowance = 0
-
 	var/tmp/cpuAverage = 0
-
-	var/tmp/timeAllowanceMax = 0
 
 /datum/controller/processScheduler/New()
 	..()
 	scheduler_sleep_interval = world.tick_lag
-	timeAllowance = world.tick_lag * 0.5
-	timeAllowanceMax = world.tick_lag
 
 /**
  * deferSetupFor
@@ -86,13 +80,7 @@ var/global/datum/controller/processScheduler/processScheduler
 		process()
 
 /datum/controller/processScheduler/proc/process()
-	updateCurrentTickData()
-	
-	for(var/i=world.tick_lag,i<world.tick_lag*50,i+=world.tick_lag)
-		spawn(i) updateCurrentTickData()
 	while(isRunning)
-		// Hopefully spawning this for 50 ticks in the future will make it the first thing in the queue.
-		spawn(world.tick_lag*50) updateCurrentTickData()
 		checkRunningProcesses()
 		queueProcesses()
 		runQueuedProcesses()
@@ -193,7 +181,6 @@ var/global/datum/controller/processScheduler/processScheduler
 	recordEnd(newProcess, 0)
 
 	nameToProcessMap[newProcess.name] = newProcess
-
 
 /datum/controller/processScheduler/proc/runProcess(var/datum/controller/process/process)
 	spawn(0)
@@ -323,30 +310,6 @@ var/global/datum/controller/processScheduler/processScheduler
 	if (hasProcess(processName))
 		var/datum/controller/process/process = nameToProcessMap[processName]
 		process.disable()
-
-/datum/controller/processScheduler/proc/getCurrentTickElapsedTime()
-	if (world.time > currentTick)
-		updateCurrentTickData()
-		return 0
-	else
-		return TimeOfHour - currentTickStart
-
-/datum/controller/processScheduler/proc/updateCurrentTickData()
-	if (world.time > currentTick)
-		// New tick!
-		currentTick = world.time
-		currentTickStart = TimeOfHour
-		updateTimeAllowance()
-		cpuAverage = (world.cpu + cpuAverage + cpuAverage) / 3
-
-
-/datum/controller/processScheduler/proc/updateTimeAllowance()
-	// Time allowance goes down linearly with world.cpu.
-	var/tmp/error = cpuAverage - 100
-	var/tmp/timeAllowanceDelta = sign(error) * -0.5 * world.tick_lag * max(0, 0.01 * abs(error))
-
-	//timeAllowance = world.tick_lag * min(1, 0.5 * ((200/max(1,cpuAverage)) - 1))
-	timeAllowance = min(timeAllowanceMax, max(0, timeAllowance + timeAllowanceDelta))
 
 /datum/controller/processScheduler/proc/sign(var/x)
 	if (x == 0)
