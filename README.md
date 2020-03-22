@@ -2,11 +2,11 @@ ProcessScheduler
 ================
 A Goonstation release, maintained by Volundr
 
-##SUMMARY
+## SUMMARY
 
 This is a mostly self-contained, fairly well-documented implementation of the main loop process architecture in use in Goonstation.
 
-##LICENSE
+## LICENSE
 
 This work is released under the following licenses.
 
@@ -19,7 +19,7 @@ This work is licensed under the Creative Commons Attribution-NonCommercial 4.0 I
 
 This work is licensed under the Affero General Public License 3.0. The complete text of the license is included in the file LICENSE-AGPL.
 
-##INSTALLATION
+## INSTALLATION
 
 To integrate the process scheduler to your codebase, you will not need anything except the contents of the core/ folder. The rest of the project is simply for testing and to provide an example for the process scheduler code.
 
@@ -38,9 +38,9 @@ bower install -g
 
 Then you can either compile with DM or open the DM environment in DreamMaker and compile/run from there.
 
-##USAGE
+## USAGE
 
-###BASICS
+### BASICS
 To use the process scheduler in your SS13 codebase, you'll need:
 
 - core/_defines.dm
@@ -65,7 +65,7 @@ The processScheduler will automatically find all subtypes of process, and begin 
 
 The interface code in test/processSchedulerView.dm is simply an example frontend, and can easily be rebuilt to use other styles, and/or render simple html without using javascript for refreshing the panel and killing processes.
 
-###DETAILS
+### DETAILS
 
 To implement a process, you have two options:
 
@@ -76,7 +76,7 @@ There are clear examples of both of these paradigms in the code provided. Both s
 
 The updateQueue works by spawn(0)'ing your specified update proc, but it only puts one instance in the scheduler at a time. Examine the code for more details. The overall effect of this is that it doesn't block, and it lets update loops work concurrently. It enables a much smoother user experience.
 
-##Contributing
+## Contributing
 
 I welcome pull requests and issue reports, and will try to merge/fix them as I have time.
 
